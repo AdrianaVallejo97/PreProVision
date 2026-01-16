@@ -4,6 +4,7 @@
 *.tfstate
 *.tfstate.backup
 *.exe
+*.tfvars
 
 # Dependencies
 node_modules
