@@ -11,6 +11,12 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
+cat <<EOF > .gitignore
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.backup
+*.exe
+EOF
 
 # Testing
 coverage
