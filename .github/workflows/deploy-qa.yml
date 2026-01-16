@@ -1,0 +1,109 @@
+name: Deploy QA
+
+on:
+  push:
+    branches: ["qa"]
+    paths:
+      - "Terraform/**"
+      - ".github/workflows/**"
+
+jobs:
+  qa-core:
+    runs-on: ubuntu-latest
+    environment: qa
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Configure AWS credentials (qa-core)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_CORE }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_CORE }}
+          aws-region: us-east-1
+
+      - name: Apply qa-core (orden)
+        env:
+          TF_VAR_ami_id: ${{ secrets.AMI_ID }}
+        run: |
+          set -e
+          cd Terraform/environments/qa/core
+
+          (cd network && terraform init -reconfigure && terraform apply -auto-approve)
+
+          if [ -d api-gateway ]; then
+            (cd api-gateway && terraform init -reconfigure && terraform apply -auto-approve)
+          fi
+
+          if [ -d bastion ]; then
+            (cd bastion && terraform init -reconfigure && terraform apply -auto-approve)
+          fi
+
+  qa-databases:
+    runs-on: ubuntu-latest
+    environment: qa
+    needs: [qa-core]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Configure AWS credentials (qa-databases)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DATABASES }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DATABASES }}
+          aws-region: us-east-1
+
+      - name: Apply QA databases
+        run: |
+          set -e
+          cd Terraform/environments/qa/core/databases
+          for d in mongodb mysqldb redis; do
+            if [ -d "$d" ]; then
+              (cd "$d" && terraform init -reconfigure && terraform apply -auto-approve)
+            fi
+          done
+
+  qa-services:
+    runs-on: ubuntu-latest
+    environment: qa
+    needs: [qa-core]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Configure AWS credentials (qa-services)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_SERVICES }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_SERVICES }}
+          aws-region: us-east-1
+
+      - name: Apply QA services
+        run: |
+          set -e
+          cd Terraform/environments/qa/services
+          for svc in $(ls -1); do
+            if [ -d "$svc" ]; then
+              echo "Deploy service: $svc"
+              (cd "$svc" && terraform init -reconfigure && terraform apply -auto-approve)
+            fi
+          done

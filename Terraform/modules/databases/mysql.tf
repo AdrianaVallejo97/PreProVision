@@ -1,8 +1,19 @@
-resource "aws_instance" "mysql" {
-  ami                    = var.ami
-  instance_type          = "t3.micro"
-  subnet_id              = var.subnet_id
-  vpc_security_group_ids = [var.sg_id]
-  key_name               = var.key_name
-  tags = { Name = "mysql-db" }
+resource "aws_security_group" "mysql_sg" {
+  count  = var.enable_mysql ? 1 : 0
+  name   = "${var.name}-mysql-sg"
+  vpc_id = var.vpc_id
+
+  ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = var.allowed_sg_ids
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
