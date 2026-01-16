@@ -1,4 +1,9 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.exe
 
 # Dependencies
 node_modules
@@ -11,13 +16,6 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
-cat <<EOF > .gitignore
-**/.terraform/
-**/.terraform.lock.hcl
-*.tfstate
-*.tfstate.backup
-*.exe
-EOF
 
 # Testing
 coverage
@@ -33,7 +31,6 @@ coverage
 out/
 build
 dist
-
 
 # Debug
 npm-debug.log*
