@@ -1,12 +1,7 @@
 FROM node:20-alpine
-
 WORKDIR /app
-
 COPY package*.json ./
-RUN npm install --production
-
+RUN npm ci --omit=dev
 COPY . .
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
+EXPOSE 3001
+CMD ["node", "src/server.js"]

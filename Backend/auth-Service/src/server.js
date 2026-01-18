@@ -1,11 +1,6 @@
 const app = require("./app");
-const sequelize = require("./config/db");
-require("dotenv").config();
+const { port } = require("./config/env");
 
-const PORT = process.env.PORT || 3000;
-
-sequelize.sync().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Auth Service running on port ${PORT}`);
-  });
+app.listen(port, () => {
+  console.log(`auth-service running on port ${port}`);
 });
