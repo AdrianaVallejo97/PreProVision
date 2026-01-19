@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const { connectMongo } = require("./src/config/mongo");
+
 const { agreementsRouter } = require("./src/routes/agreements.routes");
 const { errorMiddleware } = require("./src/middlewares/error.middleware");
 
