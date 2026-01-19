@@ -7,27 +7,22 @@ const ctrl = require("../controllers/agreements.controller");
 
 const router = express.Router();
 
+// GET /agreements  (ADMIN: todo, STUDENT: lo suyo)
 router.get("/", requireAuth, ctrl.list);
 
-router.get(
-  "/:id",
-  requireAuth,
-  [param("id").isMongoId(), validate],
-  ctrl.getById
-);
+// GET /agreements/:id
+router.get("/:id", requireAuth, [param("id").isMongoId(), validate], ctrl.getById);
 
+// POST /agreements  (STUDENT)
 router.post(
   "/",
   requireAuth,
-  [
-    body("placeId").isString(),
-    body("startDate").isISO8601(),
-    body("endDate").isISO8601(),
-    validate
-  ],
+  requireRole("STUDENT"),
+  [body("placeId").isMongoId(), validate],
   ctrl.create
 );
 
+// PATCH /agreements/:id/approve (ADMIN)
 router.patch(
   "/:id/approve",
   requireAuth,
@@ -36,12 +31,22 @@ router.patch(
   ctrl.approve
 );
 
+// PATCH /agreements/:id/reject (ADMIN)
 router.patch(
   "/:id/reject",
   requireAuth,
   requireRole("ADMIN"),
   [param("id").isMongoId(), validate],
   ctrl.reject
+);
+
+// PATCH /agreements/:id/cancel (STUDENT)
+router.patch(
+  "/:id/cancel",
+  requireAuth,
+  requireRole("STUDENT"),
+  [param("id").isMongoId(), validate],
+  ctrl.cancel
 );
 
 module.exports = { agreementsRouter: router };
