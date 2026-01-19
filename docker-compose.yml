@@ -29,5 +29,15 @@ services:
     depends_on:
       - mysql
 
+  mongo:
+    image: mongo:7
+    container_name: preprovision-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - preprovision_mongo_data:/data/db
+
 volumes:
   preprovision_mysql_data:
+  preprovision_mongo_data:
