@@ -1,38 +1,23 @@
 const express = require("express");
-const multer = require("multer");
-const { param, body } = require("express-validator");
-const { validate } = require("../utils/validate");
+const { body, param } = require("express-validator");
+const { validate } = require("../utils/validate"); // ✅ AQUÍ
 const { requireAuth } = require("../middlewares/auth.middleware");
-
-const ctrl = require("../controllers/documents.controller");
+const { requireRole } = require("../middlewares/role.middleware");
 
 const router = express.Router();
 
-// multer memory
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB (ajusta si quieres)
-});
-
-// GET /documents
-router.get("/", requireAuth, ctrl.list);
-
-// GET /documents/:id
-router.get("/:id", requireAuth, [param("id").isMongoId(), validate], ctrl.getById);
-
-// POST /documents/upload (multipart)
+// ejemplo
 router.post(
   "/upload",
   requireAuth,
-  upload.single("file"),
+  requireRole("ADMIN"),
   [
-    body("agreementId").optional().isString(),
+    body("path").isString(),
     validate
   ],
-  ctrl.upload
+  async (req, res) => {
+    res.json({ ok: true });
+  }
 );
-
-// DELETE /documents/:id
-router.delete("/:id", requireAuth, [param("id").isMongoId(), validate], ctrl.remove);
 
 module.exports = { documentsRouter: router };
