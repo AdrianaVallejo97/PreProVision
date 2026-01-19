@@ -1,0 +1,8 @@
+require("dotenv").config();
+const app = require("./app");
+
+const PORT = Number(process.env.PORT) || 3008;
+
+app.listen(PORT, () => {
+  console.log(`cache-service running on port ${PORT}`);
+});
