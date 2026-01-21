@@ -11,7 +11,7 @@ async function login(req, res, next) {
 
     const { email, password } = req.body;
 
-    // ✅ user-service valida password/status/rol
+    // ✅ user-service valida credenciales (password/status/rol)
     const user = await verifyCredentials(email, password);
 
     // ✅ auth-service solo firma JWT
