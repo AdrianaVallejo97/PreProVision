@@ -1,11 +1,12 @@
-const { USER_SERVICE_URL, INTERNAL_API_KEY } = process.env;
-
 async function verifyCredentials(email, password) {
-  const res = await fetch(`${USER_SERVICE_URL}/internal/auth/verify`, {
+  const baseUrl = process.env.USER_SERVICE_URL;
+  const internalKey = process.env.INTERNAL_API_KEY;
+
+  const res = await fetch(`${baseUrl}/internal/auth/verify`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-internal-key": INTERNAL_API_KEY
+      "x-internal-key": internalKey
     },
     body: JSON.stringify({ email, password })
   });
@@ -19,8 +20,7 @@ async function verifyCredentials(email, password) {
     throw err;
   }
 
-  return data.user;
+  return data.user; // { userId, name, email, roleName, status... }
 }
 
 module.exports = { verifyCredentials };
-
