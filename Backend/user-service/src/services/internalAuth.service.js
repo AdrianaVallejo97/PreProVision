@@ -1,5 +1,5 @@
 const bcrypt = require("bcryptjs");
-const { pool } = require("../config/db");
+const { pool } = require("../config/db.js");
 
 // Valida credenciales consultando la BD del user-service
 async function verifyUserCredentials(email, password) {
