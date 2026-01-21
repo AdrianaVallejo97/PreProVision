@@ -1,8 +1,8 @@
 const express = require("express");
 const { body } = require("express-validator");
 const { validationResult } = require("express-validator");
-const { requireInternalKey } = require("../middlewares/internalKey.middleware");
-const { verifyUserCredentials } = require("../services/internalAuth.service");
+const { requireInternalKey } = require("../middlewares/internalKey.middleware.js");
+const { verifyUserCredentials } = require("../services/internalAuth.service.js");
 
 const router = express.Router();
 
