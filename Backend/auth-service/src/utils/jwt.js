@@ -1,5 +1,3 @@
-require("dotenv").config();   // 👈 ESTA LÍNEA ES CLAVE
-
 const jwt = require("jsonwebtoken");
 
 function signToken(payload) {
