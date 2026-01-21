@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
-const { internalAuthRouter } = require("./src/routes/internalAuth.routes");
+const { internalAuthRouter } = require("./src/routes/internalAuth.routes.js");
 
 const app = express();
 app.use(cors());
