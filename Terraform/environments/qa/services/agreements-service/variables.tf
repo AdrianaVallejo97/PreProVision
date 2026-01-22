@@ -9,3 +9,8 @@ variable "metrics_port" {
   description = "Metrics port for /metrics scraping"
   default     = 9100
 }
+
+variable "admin_cidr" {
+  type        = string
+  description = "Tu IP pública en CIDR (ej: x.x.x.x/32)"
+}

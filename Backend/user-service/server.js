@@ -1,9 +1,0 @@
-require("dotenv").config();   // 👈 FALTA ESTO
-
-const app = require("./app");
-
-const PORT = process.env.PORT || 3002;
-
-app.listen(PORT, () => {
-  console.log(`user-service running on port ${PORT}`);
-});

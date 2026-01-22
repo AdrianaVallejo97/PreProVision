@@ -1,3 +1,4 @@
+// Backend/api-Gateway/src/routes/gateway.routes.js
 const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const { apiLimiter } = require("../middlewares/rateLimit.middleware");
@@ -7,51 +8,87 @@ const { requireInternalKey } = require("../middlewares/internalKey.middleware");
 const router = express.Router();
 
 function proxyTo(target, extra = {}) {
+  const { onProxyReq: extraOnProxyReq, ...rest } = extra;
+
   return createProxyMiddleware({
     target,
     changeOrigin: true,
     xfwd: true,
     logLevel: "warn",
-    ...extra,
-    onProxyReq(proxyReq, req) {
-      // forward token y user context si existe
+    proxyTimeout: 30000,
+    timeout: 30000,
+    ...rest,
+
+    onProxyReq(proxyReq, req, res) {
+      // Forward user context
       if (req.user) {
         proxyReq.setHeader("x-user-id", req.user.userId || "");
         proxyReq.setHeader("x-user-role", req.user.roleName || "");
         proxyReq.setHeader("x-user-email", req.user.email || "");
       }
-      if (extra.onProxyReq) extra.onProxyReq(proxyReq, req);
+
+      // Re-inject JSON body (porque express.json() ya lo consumió)
+      if (
+        req.body &&
+        Object.keys(req.body).length > 0 &&
+        req.headers["content-type"]?.includes("application/json")
+      ) {
+        const bodyData = JSON.stringify(req.body);
+        proxyReq.setHeader("Content-Type", "application/json");
+        proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
+        proxyReq.write(bodyData);
+      }
+
+      if (typeof extraOnProxyReq === "function") {
+        extraOnProxyReq(proxyReq, req, res);
+      }
+    },
+
+    onError(err, req, res) {
+      console.error("Proxy error:", err.message);
+      if (!res.headersSent) {
+        res.status(502).json({ error: "Bad gateway", details: err.message });
+      }
     }
   });
 }
 
-// Rate limit global
+function mount(prefix, target, middlewares = []) {
+  router.use(
+    prefix,
+    ...middlewares,
+    proxyTo(target, {
+      // ✅ vuelve a agregar el prefijo que Express recorta
+      pathRewrite: (path) => `${prefix}${path}`
+    })
+  );
+}
+
+// =========================
+// GLOBAL
+// =========================
 router.use(apiLimiter);
 
-// Health del Gateway
+// =========================
+// HEALTH
+// =========================
 router.get("/health", (req, res) => {
   res.json({ status: "UP", service: "api-gateway" });
 });
 
-/* =========================
-   PUBLIC
-   ========================= */
+// =========================
+// PUBLIC
+// =========================
+mount("/auth", process.env.AUTH_SERVICE_URL);     // -> /auth/login
+mount("/places", process.env.PLACES_SERVICE_URL); // -> /places, /places/:id
 
-// AUTH (login y /me se manejan por auth-service, pero /me requiere token en auth-service)
-router.use("/auth", proxyTo(process.env.AUTH_SERVICE_URL));
-
-// PLACES (tu places-service: GET público)
-router.get("/places", proxyTo(process.env.PLACES_SERVICE_URL));
-router.get("/places/:id", proxyTo(process.env.PLACES_SERVICE_URL));
-
-/* MONITORING (tu monitoring-service está montado en "/") */
+// Monitoring (tu monitoring está en "/")
 router.get(
   "/monitoring/metrics",
   proxyTo(process.env.MONITORING_SERVICE_URL, {
     pathRewrite: { "^/monitoring/metrics": "/metrics" }
   })
 );
-
 router.get(
   "/monitoring/health",
   proxyTo(process.env.MONITORING_SERVICE_URL, {
@@ -59,36 +96,19 @@ router.get(
   })
 );
 
-/* =========================
-   PROTECTED (JWT)
-   ========================= */
+// =========================
+// PROTECTED (JWT)
+// =========================
+mount("/agreements", process.env.AGREEMENTS_SERVICE_URL, [requireAuth]);
+mount("/quotas", process.env.QUOTAS_SERVICE_URL, [requireAuth]);
+mount("/documents", process.env.DOCUMENTS_SERVICE_URL, [requireAuth]);
 
-// AGREEMENTS: agreements-service monta app.use("/agreements", agreementsRouter)
-router.use("/agreements", requireAuth, proxyTo(process.env.AGREEMENTS_SERVICE_URL));
-
-// QUOTAS
-router.use("/quotas", requireAuth, proxyTo(process.env.QUOTAS_SERVICE_URL));
-
-// DOCUMENTS
-router.use("/documents", requireAuth, proxyTo(process.env.DOCUMENTS_SERVICE_URL));
-
-// PLACES admin (POST/PUT/PATCH) protegidos
-router.post("/places", requireAuth, proxyTo(process.env.PLACES_SERVICE_URL));
-router.put("/places/:id", requireAuth, proxyTo(process.env.PLACES_SERVICE_URL));
-router.patch("/places/:id/close", requireAuth, proxyTo(process.env.PLACES_SERVICE_URL));
-
-/* =========================
-   INTERNAL (microservicios)
-   =========================
-   user-service:   /internal/auth/verify
-   cache-service:  /internal/cache/...
-   notifications:  /internal/notifications/...
-   viewing:        /internal/viewing/...
-*/
-
-router.use("/internal", requireInternalKey, proxyTo(process.env.USER_SERVICE_URL));
-router.use("/internal/cache", requireInternalKey, proxyTo(process.env.CACHE_SERVICE_URL));
-router.use("/internal/notifications", requireInternalKey, proxyTo(process.env.NOTIFICATIONS_SERVICE_URL));
-router.use("/internal/viewing", requireInternalKey, proxyTo(process.env.VIEWING_SERVICE_URL));
+// =========================
+// INTERNAL (x-internal-key)
+// =========================
+mount("/internal", process.env.USER_SERVICE_URL, [requireInternalKey]);
+mount("/internal/cache", process.env.CACHE_SERVICE_URL, [requireInternalKey]);
+mount("/internal/notifications", process.env.NOTIFICATIONS_SERVICE_URL, [requireInternalKey]);
+mount("/internal/viewing", process.env.VIEWING_SERVICE_URL, [requireInternalKey]);
 
 module.exports = { gatewayRouter: router };

@@ -1,25 +1,15 @@
 #####################################
-# REMOTE STATE - NETWORK (LOCAL)
+# REMOTE STATE - SERVICES NETWORK
 #####################################
 data "terraform_remote_state" "network" {
   backend = "local"
   config = {
-    path = "../../core/network/terraform.tfstate"
+    path = "../network/terraform.tfstate"
   }
 }
 
 #####################################
-# REMOTE STATE - API GATEWAY (LOCAL)
-#####################################
-data "terraform_remote_state" "api_gateway" {
-  backend = "local"
-  config = {
-    path = "../../core/api-gateway/terraform.tfstate"
-  }
-}
-
-#####################################
-# REMOTE STATE - MONITORING SERVICE (LOCAL)
+# REMOTE STATE - MONITORING SERVICE
 #####################################
 data "terraform_remote_state" "monitoring" {
   backend = "local"
@@ -36,16 +26,14 @@ resource "aws_security_group" "agreements_service_sg" {
   vpc_id = data.terraform_remote_state.network.outputs.vpc_id
 
   #################################
-  # API Gateway -> Agreements (HTTP)
+  # HTTP access (TEMP - tu IP)
   #################################
   ingress {
-    description     = "HTTP from API Gateway"
-    from_port       = var.service_port
-    to_port         = var.service_port
-    protocol        = "tcp"
-    security_groups = [
-      data.terraform_remote_state.api_gateway.outputs.api_gateway_sg_id
-    ]
+    description = "HTTP admin/test access (TEMP)"
+    from_port   = var.service_port
+    to_port     = var.service_port
+    protocol    = "tcp"
+    cidr_blocks = [var.admin_cidr]
   }
 
   #################################
@@ -70,8 +58,4 @@ resource "aws_security_group" "agreements_service_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-
-output "agreements_service_sg_id" {
-  value = aws_security_group.agreements_service_sg.id
 }

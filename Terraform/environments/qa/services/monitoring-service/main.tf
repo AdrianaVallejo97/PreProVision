@@ -1,20 +1,10 @@
 #####################################
-# REMOTE STATE - NETWORK (LOCAL)
+# REMOTE STATE - SERVICES NETWORK
 #####################################
 data "terraform_remote_state" "network" {
   backend = "local"
   config = {
-    path = "../../core/network/terraform.tfstate"
-  }
-}
-
-#####################################
-# REMOTE STATE - BASTION (LOCAL)
-#####################################
-data "terraform_remote_state" "bastion" {
-  backend = "local"
-  config = {
-    path = "../../core/bastion/terraform.tfstate"
+    path = "../network/terraform.tfstate"
   }
 }
 
@@ -25,40 +15,28 @@ resource "aws_security_group" "monitoring_sg" {
   name   = "qa-monitoring-service-sg"
   vpc_id = data.terraform_remote_state.network.outputs.vpc_id
 
-  #################################
-  # Ingress from Bastion (admin/debug)
-  #################################
   ingress {
-    description = "Admin access from Bastion"
+    description = "Admin access from your IP (TEMP)"
     from_port   = var.monitor_port
     to_port     = var.monitor_port
     protocol    = "tcp"
-    security_groups = [
-      data.terraform_remote_state.bastion.outputs.bastion_sg_id
-    ]
+    cidr_blocks = [var.admin_cidr]
   }
 
-  #################################
-  # Egress to scrape metrics inside VPC
-  #################################
   egress {
-    description = "Scrape metrics from services (pull)"
+    description = "Scrape metrics inside VPC"
     from_port   = var.metrics_port
     to_port     = var.metrics_port
     protocol    = "tcp"
-    cidr_blocks = [
-      data.terraform_remote_state.network.outputs.vpc_cidr
-    ]
+    cidr_blocks = [data.terraform_remote_state.network.outputs.vpc_cidr]
   }
 
-  #################################
-  # Egress HTTPS (CloudWatch / external exporters)
-  #################################
   egress {
-    description = "Outbound HTTPS (CloudWatch/External)"
+    description = "Outbound HTTPS"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+

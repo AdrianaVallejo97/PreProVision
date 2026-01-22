@@ -38,6 +38,33 @@ services:
     volumes:
       - preprovision_mongo_data:/data/db
 
+  redis:
+    image: redis:7-alpine
+    container_name: preprovision-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - preprovision_redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+
+  cache-service:
+    build:
+      context: ./Backend/cache-service
+    container_name: preprovision-cache-service
+    restart: unless-stopped
+    ports:
+      - "3008:3008"
+    environment:
+      PORT: 3008
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      INTERNAL_API_KEY: internal_shared_secret
+    depends_on:
+      - redis
+
 volumes:
   preprovision_mysql_data:
   preprovision_mongo_data:
+  preprovision_redis_data:
