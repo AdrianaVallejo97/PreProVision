@@ -28,9 +28,24 @@ async function getById(req, res, next) {
 // STUDENT crea solicitud (PENDING)
 async function create(req, res, next) {
   try {
+    const userId = req.user.userId;
+    const placeId = req.body.placeId;
+
+    // ✅ Evitar que el student se postule 2 veces a la misma plaza
+    // Si ya existe una solicitud activa (PENDING o APPROVED), no permitas crear otra.
+    const exists = await Agreement.findOne({
+      userId,
+      placeId,
+      status: { $in: ["PENDING", "APPROVED"] }
+    });
+
+    if (exists) {
+      return res.status(409).json({ error: "You already applied to this place." });
+    }
+
     const ag = await Agreement.create({
-      userId: req.user.userId,
-      placeId: req.body.placeId
+      userId,
+      placeId
     });
 
     res.status(201).json({ agreement: ag });
@@ -45,11 +60,32 @@ async function approve(req, res, next) {
 
     if (ag.status !== "PENDING") return res.status(400).json({ error: "Only PENDING can be approved" });
 
+    // ✅ reservar cupo (1) antes de aprobar
+    const placeId = String(ag.placeId);
+    const authHeader = req.headers.authorization || "";
+
+    const reserveRes = await fetch(`${process.env.QUOTAS_SERVICE_URL}/quotas/${placeId}/reserve`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": authHeader
+      },
+      body: JSON.stringify({ amount: 1 })
+    });
+
+    const reserveData = await reserveRes.json().catch(() => ({}));
+
+    if (!reserveRes.ok) {
+      // típicamente 409 cuando no hay cupo
+      return res.status(reserveRes.status).json({
+        error: reserveData?.error || "Could not reserve quota"
+      });
+    }
+
     ag.status = "APPROVED";
     ag.approvedAt = new Date();
     await ag.save();
 
-    // (Luego aquí llamaremos quotas-service para reservar cupo y emitir evento)
     res.json({ agreement: ag });
   } catch (e) { next(e); }
 }
@@ -86,5 +122,19 @@ async function cancel(req, res, next) {
     res.json({ agreement: ag });
   } catch (e) { next(e); }
 }
+async function approvedStudentsByPlace(req, res, next) {
+  try {
+    const placeId = req.params.placeId;
 
-module.exports = { list, getById, create, approve, reject, cancel };
+    const rows = await Agreement.find({
+      placeId,
+      status: "APPROVED"
+    }).select("userId").lean();
+
+    const userIds = [...new Set(rows.map(r => r.userId))];
+    res.json({ userIds });
+  } catch (e) { next(e); }
+}
+
+module.exports = { list, getById, create, approve, reject, cancel, approvedStudentsByPlace };
+
