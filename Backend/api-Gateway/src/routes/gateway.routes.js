@@ -4,6 +4,8 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 const { apiLimiter } = require("../middlewares/rateLimit.middleware");
 const { requireAuth } = require("../middlewares/auth.middleware");
 const { requireInternalKey } = require("../middlewares/internalKey.middleware");
+const { requireRole } = require("../middlewares/role.middleware");
+
 
 const router = express.Router();
 
@@ -102,6 +104,9 @@ router.get(
 mount("/agreements", process.env.AGREEMENTS_SERVICE_URL, [requireAuth]);
 mount("/quotas", process.env.QUOTAS_SERVICE_URL, [requireAuth]);
 mount("/documents", process.env.DOCUMENTS_SERVICE_URL, [requireAuth]);
+// USERS (ADMIN)
+mount("/users", process.env.USER_SERVICE_URL, [requireAuth, requireRole("ADMIN")]);
+
 
 // =========================
 // INTERNAL (x-internal-key)
@@ -110,5 +115,7 @@ mount("/internal", process.env.USER_SERVICE_URL, [requireInternalKey]);
 mount("/internal/cache", process.env.CACHE_SERVICE_URL, [requireInternalKey]);
 mount("/internal/notifications", process.env.NOTIFICATIONS_SERVICE_URL, [requireInternalKey]);
 mount("/internal/viewing", process.env.VIEWING_SERVICE_URL, [requireInternalKey]);
+mount("/viewing", process.env.VIEWING_SERVICE_URL, [requireAuth]);
+
 
 module.exports = { gatewayRouter: router };
