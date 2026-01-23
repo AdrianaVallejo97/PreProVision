@@ -49,4 +49,12 @@ router.patch(
   ctrl.cancel
 );
 
+router.get(
+  "/place/:placeId/approved-users",
+  requireAuth,
+  requireRole("ADMIN"),
+  [param("placeId").isMongoId(), validate],
+  ctrl.approvedStudentsByPlace
+);
+
 module.exports = { agreementsRouter: router };
