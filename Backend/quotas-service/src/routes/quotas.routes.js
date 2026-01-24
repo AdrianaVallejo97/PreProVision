@@ -5,8 +5,15 @@ const { validate } = require("../utils/validate");
 const { requireAuth } = require("../middlewares/auth.middleware");
 const { requireRole } = require("../middlewares/role.middleware");
 const ctrl = require("../controllers/quotas.controller");
+const { requireInternalKey } = require("../middlewares/internalKey.middleware");
+
 
 const router = express.Router();
+
+// ✅ health simple (opcional)
+router.get("/", (req, res) => {
+  res.json({ ok: true, message: "quotas-service is running. Use /quotas/:placeId" });
+});
 
 // Consultar cuota (auth)
 router.get(
@@ -50,6 +57,13 @@ router.post(
   requireRole("ADMIN"),
   [param("placeId").isString(), body("amount").optional().isInt({ min: 1 }), validate],
   ctrl.release
+);
+// INTERNAL: crear quota inicial (solo microservicios)
+router.post(
+  "/internal",
+  requireInternalKey,
+  [body("placeId").isString(), body("capacity").isInt({ min: 0 }), validate],
+  ctrl.create
 );
 
 module.exports = { quotasRouter: router };
