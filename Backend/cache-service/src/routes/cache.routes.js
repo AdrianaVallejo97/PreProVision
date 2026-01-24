@@ -2,7 +2,7 @@ const express = require("express");
 const { body, param } = require("express-validator");
 const { validate } = require("../utils/validate");
 const { internalKey } = require("../middlewares/internalKey.middleware");
-const { getRedis } = require("../config/redis");
+const { client } = require("../config/redis");
 
 const router = express.Router();
 
@@ -15,8 +15,7 @@ const router = express.Router();
 // GET /internal/cache/:key
 router.get("/cache/:key", internalKey, [param("key").isString(), validate], async (req, res, next) => {
   try {
-    const redis = getRedis();
-    const value = await redis.get(req.params.key);
+    const value = await client.get(req.params.key);
     res.json({ key: req.params.key, value });
   } catch (e) {
     next(e);
@@ -36,14 +35,13 @@ router.post(
   async (req, res, next) => {
     try {
       const { key, value, ttlSeconds } = req.body;
-      const redis = getRedis();
 
       const payload = typeof value === "string" ? value : JSON.stringify(value);
 
       if (ttlSeconds) {
-        await redis.setEx(key, ttlSeconds, payload);
+        await client.setEx(key, Number(ttlSeconds), payload);
       } else {
-        await redis.set(key, payload);
+        await client.set(key, payload);
       }
 
       res.status(201).json({ ok: true, key });
@@ -56,8 +54,7 @@ router.post(
 // DELETE /internal/cache/:key
 router.delete("/cache/:key", internalKey, [param("key").isString(), validate], async (req, res, next) => {
   try {
-    const redis = getRedis();
-    await redis.del(req.params.key);
+    await client.del(req.params.key);
     res.json({ ok: true });
   } catch (e) {
     next(e);
