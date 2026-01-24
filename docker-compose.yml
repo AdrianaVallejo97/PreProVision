@@ -48,21 +48,134 @@ services:
       - preprovision_redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
 
+  # ---------- SERVICES ----------
+  user-service:
+    build: ./Backend/user-service
+    container_name: preprovision-user-service
+    restart: unless-stopped
+    env_file:
+      - ./Backend/user-service/.env
+    ports:
+      - "3002:3002"
+    depends_on:
+      - mysql
+
+  auth-service:
+    build: ./Backend/auth-service
+    container_name: preprovision-auth-service
+    restart: unless-stopped
+    env_file:
+      - ./Backend/auth-service/.env
+    ports:
+      - "3001:3001"
+    depends_on:
+      - user-service
+
+  places-service:
+    build: ./Backend/places-service
+    container_name: preprovision-places-service
+    restart: unless-stopped
+    env_file:
+      - ./Backend/places-service/.env
+    ports:
+      - "3003:3003"
+    depends_on:
+      - mongo
+
+  agreements-service:
+    build: ./Backend/agreements-service
+    container_name: preprovision-agreements-service
+    restart: unless-stopped
+    env_file:
+      - ./Backend/agreements-service/.env
+    ports:
+      - "3004:3004"
+    depends_on:
+      - mongo
+
+  quotas-service:
+    build: ./Backend/quotas-service
+    container_name: preprovision-quotas-service
+    restart: unless-stopped
+    env_file:
+      - ./Backend/quotas-service/.env
+    ports:
+      - "3005:3005"
+    depends_on:
+      - mongo
+
+  documents-service:
+    build: ./Backend/documents-service
+    container_name: preprovision-documents-service
+    restart: unless-stopped
+    env_file:
+      - ./Backend/documents-service/.env
+    ports:
+      - "3006:3006"
+    depends_on:
+      - mongo
+
+  notifications-service:
+    build: ./Backend/notifications-service
+    container_name: preprovision-notifications-service
+    restart: unless-stopped
+    env_file:
+      - ./Backend/notifications-service/.env
+    ports:
+      - "3007:3007"
+    depends_on:
+      - mongo
+
   cache-service:
-    build:
-      context: ./Backend/cache-service
+    build: ./Backend/cache-service
     container_name: preprovision-cache-service
     restart: unless-stopped
+    env_file:
+      - ./Backend/cache-service/.env
     ports:
       - "3008:3008"
-    environment:
-      PORT: 3008
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ""
-      INTERNAL_API_KEY: internal_shared_secret
     depends_on:
       - redis
+
+  viewing-service:
+    build: ./Backend/viewing-service
+    container_name: preprovision-viewing-service
+    restart: unless-stopped
+    env_file:
+      - ./Backend/viewing-service/.env
+    ports:
+      - "3009:3009"
+    depends_on:
+      - mongo
+
+  monitoring-service:
+    build: ./Backend/monitoring-service
+    container_name: preprovision-monitoring-service
+    restart: unless-stopped
+    env_file:
+      - ./Backend/monitoring-service/.env
+    ports:
+      - "3010:3010"
+
+  api-gateway:
+    build: ./Backend/api-Gateway
+    container_name: preprovision-api-gateway
+    restart: unless-stopped
+    env_file:
+      - ./Backend/api-Gateway/.env
+    ports:
+      - "3100:3100"
+    depends_on:
+      - auth-service
+      - user-service
+      - places-service
+      - agreements-service
+      - quotas-service
+      - documents-service
+      - notifications-service
+      - cache-service
+      - viewing-service
+      - monitoring-service
 
 volumes:
   preprovision_mysql_data:
