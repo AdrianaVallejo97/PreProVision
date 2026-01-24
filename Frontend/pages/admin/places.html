@@ -1,0 +1,66 @@
+<section data-title="Places">
+  <div class="card card-pad" style="margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
+      <div>
+        <p class="h1" style="margin:0;">Places</p>
+       </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="btnTogglePlaceForm">Create place</button>
+        <button class="btn" id="btnReloadPlacesAdmin">Reload</button>
+        <input class="input" id="placeSearch" placeholder="Search by name..." style="width:260px;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM (hidden by default) -->
+  <div class="card card-pad hidden" id="placeFormWrap" style="margin-bottom:12px;">
+    <p class="h1">Create / Edit place</p>
+    <p class="h2" id="placeHint">Create a new place or click “Edit”.</p>
+
+    <form id="placeForm" class="form-grid-2" style="margin-top:12px;">
+      <input type="hidden" id="placeId" value="" />
+
+      <div>
+        <div class="label">Name</div>
+        <input class="input" id="name" required minlength="3" placeholder="Ej: Pasantía UCE" />
+      </div>
+
+      <div>
+        <div class="label">Capacity</div>
+        <input class="input" id="capacity" type="number" min="0" step="1" required placeholder="50" />
+      </div>
+
+      <div style="grid-column: 1 / -1;">
+        <div class="label">Description</div>
+        <textarea class="textarea" id="description" placeholder="Descripción breve"></textarea>
+      </div>
+
+      <div>
+        <div class="label">Start date</div>
+        <input class="input" id="startDate" type="date" required />
+      </div>
+
+      <div>
+        <div class="label">End date</div>
+        <input class="input" id="endDate" type="date" required />
+      </div>
+
+      <div>
+        <div class="label">Status</div>
+        <select class="input" id="status">
+          <option value="OPEN">OPEN</option>
+          <option value="CLOSED">CLOSED</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;align-self:end;">
+        <button class="btn btn-primary" type="submit" id="btnSavePlace">Save</button>
+        <button class="btn" type="button" id="btnResetPlace">Reset</button>
+        <button class="btn" type="button" id="btnCancelPlaceForm">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="placesAdminTableWrap"></div>
+</section>

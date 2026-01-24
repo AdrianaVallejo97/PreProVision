@@ -1,0 +1,25 @@
+/* Admin Documents layout */
+.upload-row{
+  display:grid;
+  grid-template-columns: 360px 1fr;
+  gap: 14px;
+  align-items:start;
+}
+
+@media (max-width: 980px){
+  .upload-row{ grid-template-columns: 1fr; }
+}
+
+/* Make the right card fill */
+#docsAdminList{
+  min-height: 80px;
+}
+
+/* Ensure tables don’t overflow weirdly */
+.table{
+  width: 100%;
+  table-layout: fixed;
+}
+.table th, .table td{
+  word-break: break-word;
+}

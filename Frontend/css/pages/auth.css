@@ -1,0 +1,47 @@
+/* Login centered, bigger, no hero image */
+
+.auth-shell{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+.auth-panel{
+  width: min(680px, 95vw);
+}
+
+.auth-card{
+  padding: 30px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom: 8px;
+}
+
+.brand-logo img{
+  width:52px;
+  height:52px;
+  object-fit:contain;
+}
+
+.brand-name{ font-weight:1000; font-size:25px; }
+.brand-sub{ color: var(--muted); font-size: 13px; }
+
+.form-grid{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.input{
+  height: 50x;             /* antes 44px */
+  border-radius: 16px;      /* un poco más “pro” */
+}
+
+.btn{
+  height: 50px;             /* antes 44px */
+}

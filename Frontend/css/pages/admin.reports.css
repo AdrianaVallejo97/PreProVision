@@ -1,0 +1,17 @@
+/* Admin Reports */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+@media (max-width: 980px){
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px){
+  .cards { grid-template-columns: 1fr; }
+}
+.card-metric .value { font-size: 28px; font-weight: 800; margin: 6px 0 0 0; }
+.card-metric .label { color: var(--muted); font-size: 13px; margin: 0; }
+.canvas-wrap { margin-top: 12px; }
+canvas { width: 100%; max-width: 100%; height: 260px; }

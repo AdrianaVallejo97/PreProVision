@@ -1,0 +1,48 @@
+<section data-title="Documents">
+  <div class="card card-pad" style="margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
+      <div>
+        <p class="h1" style="margin:0;">Upload documents</p>
+      </div>
+      <button class="btn" id="btnReloadDocsAdmin">Reload</button>
+    </div>
+  </div>
+
+  <div class="card card-pad">
+    <form id="docUploadForm" class="upload-row">
+      <div>
+        <div class="label">Associate to</div>
+        <select class="input" id="docKind">
+          <option value="PLACE">PLACE</option>
+          <option value="AGREEMENT">AGREEMENT</option>
+        </select>
+
+        <div style="height:10px;"></div>
+
+        <div class="label">Place/Agreement ID</div>
+        <input class="input" id="docEntityId" placeholder="MongoId..." required />
+
+        <div style="height:10px;"></div>
+        <div id="targetUserWrap">
+          <div class="label">Student (for AGREEMENT)</div>
+          <select class="input" id="docTargetUserId">
+            <option value="">Select student...</option>
+          </select>
+          <div class="h2" id="targetUserHint" style="margin-top:6px;"></div>
+        </div>
+        <div class="label">File</div>
+        <input class="input" id="docFile" type="file" required />
+
+        <div style="height:12px;"></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" type="submit" id="btnUploadDoc">Upload</button>
+        <button class="btn" type="button" id="btnCancelDoc">Cancel</button>
+        </div>
+      </div>
+      <div class="card card-pad">
+        <p class="h1">Uploaded documents</p>
+        <div id="docsAdminList" style="margin-top:12px;">—</div>
+      </div>
+    </form>
+  </div>
+</section>

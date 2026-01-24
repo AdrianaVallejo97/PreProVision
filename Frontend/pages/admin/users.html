@@ -1,0 +1,62 @@
+<section data-title="Users ">
+  <div class="card card-pad" style="margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
+      <div>
+        <p class="h1" style="margin:0;">Manage users</p>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="btnToggleUserForm">Create user</button>
+        <button class="btn" id="btnReloadUsers">Reload</button>
+        <input class="input" id="userSearch" placeholder="Search by email/name..." style="width:260px;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM (hidden by default) -->
+  <div class="card card-pad hidden" id="userFormWrap" style="margin-bottom:12px;">
+    <p class="h1">Create / Edit user</p>
+    <form id="userForm" class="form-grid-2" style="margin-top:12px;">
+      <input type="hidden" id="userId" value="" />
+
+      <div>
+        <div class="label">Name</div>
+        <input class="input" id="name" required minlength="3" placeholder="Full name" />
+      </div>
+
+      <div>
+        <div class="label">Email</div>
+        <input class="input" id="email" type="email" required placeholder="user@uce.edu.ec" />
+      </div>
+
+      <div>
+        <div class="label">Password (required for create)</div>
+        <input class="input" id="password" type="password" minlength="6" placeholder="••••••••" />
+      </div>
+
+      <div>
+        <div class="label">Role</div>
+        <select class="input" id="roleName">
+          <option value="STUDENT">STUDENT</option>
+          <option value="ADMIN">ADMIN</option>
+        </select>
+      </div>
+
+      <div>
+        <div class="label">Status</div>
+        <select class="input" id="status">
+          <option value="ACTIVE">ACTIVE</option>
+          <option value="DISABLED">DISABLED</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;align-self:end;">
+        <button class="btn btn-primary" type="submit" id="btnSaveUser">Save</button>
+        <button class="btn" type="button" id="btnResetUser">Reset</button>
+        <button class="btn" type="button" id="btnCancelUserForm">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="usersTableWrap"></div>
+</section>

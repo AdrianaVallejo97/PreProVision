@@ -1,0 +1,8 @@
+/* Student Documents */
+.doc-item {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+.doc-meta { color: var(--muted); font-size: 13px; margin-top: 6px; }

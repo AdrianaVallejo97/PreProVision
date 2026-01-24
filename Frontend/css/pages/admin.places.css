@@ -1,0 +1,32 @@
+/* Admin Places helpers */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 860px){
+  .form-grid-2 { grid-template-columns: 1fr; }
+}
+
+.actions-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.textarea {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.18);
+  color: var(--text);
+  padding: 10px 12px;
+  outline: none;
+  resize: vertical;
+  min-height: 92px;
+}
+.textarea:focus {
+  border-color: rgba(124,92,255,0.55);
+  box-shadow: 0 0 0 4px rgba(124,92,255,0.12);
+}
