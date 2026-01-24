@@ -1,5 +1,8 @@
 const express = require("express");
 const cors = require("cors");
+const { viewingPublicRouter } = require("./src/routes/viewing.public.routes");
+app.use("/viewing", viewingPublicRouter); // ✅ nuevo (JWT)
+
 
 const { connectMongo } = require("./src/config/mongo");
 const { viewingRouter } = require("./src/routes/viewing.routes");
